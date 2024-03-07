@@ -2,14 +2,13 @@
 //here we are createing a warpper function which can used anywhere where we want to connect to somewhere
 
 //here we are using promises which will return promise
+
 const asyncHandler = (requestHandler)=> (req,res,next)=>{
     Promise.resolve(requestHandler(req,res,next))
     .catch((error)=>{
             return next(error)
     })
 };
-
-
 
 export {asyncHandler}
 
