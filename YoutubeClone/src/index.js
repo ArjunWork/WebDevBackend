@@ -9,14 +9,34 @@ import dotenv from 'dotenv'
 //for db connection
 import connectDB from "./db/index.js";
 
+//for express
+import {app} from './app.js'
+
 //config dotenv if using import 
 dotenv.config({
     path:'./env'
 })
 
 //Function execution to connect to db
-connectDB();
+//connectDb is an async code which means whenever the async code completes it will return a promiss which we can use to connect to app.express 
+connectDB()
+.then(()=>{
 
+    //to handle an error for express i.e if db is connected but unable to contact to express so we add express listeners
+    app.on("error",(error)=>{
+        console.error("ERROR While connecting MONGODB to express:- ",error);
+        throw error;
+    })
+
+    //after succesfully connection of data base we will start our server
+    app.listen(process.env.PORT || 8000, ()=>{
+        console.log(`App server listening at port : ${process.env.PORT}`)
+    })
+})
+.catch((error)=>{
+    console(`MongoDb connection Failed !! unable to connect to App express :- ${error}`);
+    throw error;
+})
 
 
 
