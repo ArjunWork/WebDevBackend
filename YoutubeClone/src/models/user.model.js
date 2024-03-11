@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
 userSchema.pre("save",async function(next){
     //if password is modified then only do encryption
     if(this.isModified("password")){
-        this.password = bcrypt.hash(this.password,10) // 10 = for how much round you want to encrypt data
+        this.password =await bcrypt.hash(this.password,10) // 10 = for how much round you want to encrypt data
         next(); 
     }
     else{
