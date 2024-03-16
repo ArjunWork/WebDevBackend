@@ -42,4 +42,15 @@ app.use(express.static(
 //to set and accept cookies from user browser safely and the server can do crud operation
 app.use(cookieParser());
 
+
+
+//Routes Import
+import userRouter from './routes/user.routes.js'
+
+//Routes declaration
+//initially we used to write app.get() because at that time we were not declaring routers outeside the file of express right now we have declared routes outside the file thus we have to use some middle ware to import routes into express file to use app.get()
+//we will use middle ware 'use' to use router
+
+app.use("/api/v1/users",userRouter) //    http://localhost:8000/api/v1/users
+
 export {app};
