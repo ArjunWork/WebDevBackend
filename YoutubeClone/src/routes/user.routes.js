@@ -1,5 +1,5 @@
 import {Router} from 'express'
-import {loginUser, logoutUser, registerUser} from '../controllers/user.controller.js'
+import {loginUser, logoutUser, refreshAccessToken, registerUser} from '../controllers/user.controller.js'
 import {upload} from '../middlewares/multer.middleware.js'
 import { verifyJWT } from '../middlewares/auth.middleware.js';
 
@@ -28,6 +28,7 @@ router.route("/login").post(loginUser)
 // we need to pass the verifyJWT middlewear from auth.middlewarew.js before going to logoutUser 
 //router sometime mayget confused which it should run in sequence generally it run first one (verifyJWT) but after running it gets confused that was there something else(logoutUser) which i forgot to run then to tackel this situtaion we run next() at the end of defination of middlewear in verifyJWT 
 router.route("/logout").post(verifyJWT,  logoutUser);
+router.route("/refresh-token").post(refreshAccessToken); // this is the end point where we will hit the api to get the new refresh and access token
 
 
 

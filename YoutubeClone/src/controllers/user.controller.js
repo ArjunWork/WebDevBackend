@@ -3,6 +3,7 @@ import {ApiError} from '../utils/ApiError.js'
 import {User} from '../models/user.model.js'
 import {uploadOnCloudinary} from '../utils/cloudnary.js'
 import {ApiResponse} from '../utils/ApiResponse.js'
+import jwt  from 'jsonwebtoken'
 
 //in asyncHandler we will pass a function 
 
@@ -220,7 +221,8 @@ const loginUser = asyncHandler( async(req,res,next)=>{
         httpOnly:true, //cookies are visible for everyone but only server can modifiy it
         secure:true
     }
-
+    // console.log("Access token is ",accessToken);
+    // console.log("Refresh token is ",refreshToken);
     return res
     .status(200)
     .cookie("accessToken",accessToken,options)    //we can use cookies beacuse in app.js we have used cookieparser
@@ -237,6 +239,7 @@ const loginUser = asyncHandler( async(req,res,next)=>{
     )
 
 })
+
 
 // D.) LogOut User
 //in loginUser we have taken user info to login thuswe know which one is the user but in the case of LogoutUser we dont know who is user beacuse we are not filling the form for logOut to ectract details email and password which we used to do in logIn thus we have to create an middleWear to pass user creedintials to LogoutUser function this middlewear will be authenticaction middlewear auth.middleware.js
@@ -276,4 +279,85 @@ const logoutUser = asyncHandler( async(req,res,next)=>{
     .json(new ApiResponse(200,{},"User Logged Out"));
 })
 
-export {registerUser,loginUser,logoutUser};
+
+//E) End Point where api will hit to generate new access and refresh token(Session Storage)
+//access token is generally stored in your computer and refresh token is stored in db ,access token is short lived ,thus whenever the access token expire we generally throw 401 error at frontend to relogin to avoid this situation we have refresh token ,
+//whenever the access token expires we pass access token with refresh token at an end point(which we are going to create)where it will hit the api, if there the recieved refresh token and db stored refresh token if both are same then it generate the new access and refresh token and automatically relogin the user without informing him
+
+// ** ** before making the end point we have to create a controller ** **
+// we will create the end point in user.routes.js
+const refreshAccessToken = asyncHandler(async(req,res,next)=>{
+
+    // 1.) take incoming refresh toke
+    // 2.) decode and verify the refresh token
+    // 3.) now from this decoded token find user id from db
+    // 4.) now compare db user refresh token with incoming refresh token
+    // 5.) now generate new refresh token
+    // 6.) at last return the response
+
+    // 1.) take incoming refresh toke
+    const incomingRefreshToken =req.cookies.refreshToken || req.body.refreshToken //if someone is using moblie phone
+    //if i dont find any refresh Token
+    if(!incomingRefreshToken){
+        throw new ApiError(401,"unauthorized Request");
+    }
+
+
+    //since we are going to use db thus it is advised to use try and catch
+    try {
+        // 2.) decode and verify the refresh token    
+        //verify the refresh token
+        //the user refresh token which we are receving is encrypted token and the token which we store in our db is raw token(non encrypted)
+        const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET);
+    
+    
+    
+        // 3.) now from this decoded token find user id from db    
+        //now we have userId from decodedToken beacuse refresh token was encoded using id in user.model.js => userSchema.methods.generateRefreshToken thus after decoding we have user id
+        const user = await User.findById(decodedToken?._id);
+        //if we couldnt find user related to this token
+        if(!user){
+            throw new ApiError(401,"invalid refresh token");
+        }
+    
+        
+    
+        // 4.) now compare db user refresh token with incoming refresh token    
+        //now we have incomingRefreshToken which we recived from user for reloggin and for db refresh token we will take help from our recently created user id
+        // we know that in generateAccessAndRefereshTokens function in this file we have used this line user.refreshToken = refreshToken; await user.save({ validateBeforeSave:false }); thus we have refresh token in our current user which is stored in db thus we can compare these both tokens
+        if(incomingRefreshToken!==user?.refreshToken){
+            throw new ApiError(401,"refresh token is used/expired");
+        }
+    
+    
+    
+        // 5.)now generate new refresh token
+        const {newAccessToken,newRefreshToken} = await generateAccessAndRefereshTokens(user._id);
+    
+        
+    
+        // 6.) at last return the response
+        const opetions = {
+            httpOnly : true,
+            secure : true
+        }
+    
+        return res
+        .status(200)
+        .cookie("accessToken",newAccessToken,options)    //we can use cookies beacuse in app.js we have used cookieparser
+        .cookie("refreshToken",newRefreshToken,options)
+        .json(
+            new ApiResponse(
+                201,
+                {accessToken: newAccessToken, refreshToken: newRefreshToken},
+                "Access Token Refresh Successfully"
+            )
+        );
+
+    } catch (error) {
+        throw new ApiError(401,error?.message || "Invalid refresh token");
+    }
+
+});
+
+export {registerUser,loginUser,logoutUser,refreshAccessToken};

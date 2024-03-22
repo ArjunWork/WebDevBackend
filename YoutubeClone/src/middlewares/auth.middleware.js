@@ -27,6 +27,7 @@ export const verifyJWT = asyncHandler(
         
             //now decode this jwt token info and verify it
             //to verify it jwt will require the token and its secret key to decode this token
+            //the user refresh token which we are receving is encrypted token and the token which we store in our db is raw token(non encrypted)
             const decodedToken = await jwt.verify(token,process.env.ACCESS_TOKEN_SECRET);
             
             //this decoded Token will have _id ,email,username,fullname because this is what we have encoded in accessToken in userSchema.methods.generateAccessToken in user.model.js
@@ -35,7 +36,7 @@ export const verifyJWT = asyncHandler(
         
             //if user dosent exist
             if(!user){
-                throw new ApiError(401,"InValid Access Token");
+                throw new ApiError(401,"Invalid Access Token");
             }
         
             //after getting user now we will add new object user in our request 
