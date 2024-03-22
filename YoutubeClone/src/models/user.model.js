@@ -69,9 +69,9 @@ userSchema.pre("save",async function(next){
 }) 
 
 //to create our own mongoose method we use methods
-//to checkif after encryption the data and password are still same or not
+//to check while login that entered password is correct or not
 userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password,this.password); //password is normal non encypted password and this.password is encrypted password
+    return await bcrypt.compare(password,this.password); //password is normal non encypted password passed from front end login page and this.password is password stored in mongodb
     //here bcrypt.compare will return true or false
 }
 

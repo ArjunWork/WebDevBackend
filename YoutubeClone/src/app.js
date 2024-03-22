@@ -48,8 +48,8 @@ app.use(cookieParser());
 import userRouter from './routes/user.routes.js'
 
 //Routes declaration
-//initially we used to write app.get() because at that time we were not declaring routers outeside the file of express right now we have declared routes outside the file thus we have to use some middle ware to import routes into express file to use app.get()
-//we will use middle ware 'use' to use router
+//initially we used to write app.get('/api/v1/users',()=>{}) because at that time we were not declaring routers outeside the file of express right now we have declared routes outside the file thus we have to use some middle ware to import routes into express file to use app.get()
+//we will use middleware 'use' to use router
 
 app.use("/api/v1/users",userRouter) //    http://localhost:8000/api/v1/users
 

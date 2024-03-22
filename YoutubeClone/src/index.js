@@ -14,7 +14,7 @@ import {app} from './app.js'
 
 //config dotenv if using import 
 dotenv.config({
-    path:'./env'
+    path:'./.env'
 })
 
 //Function execution to connect to db
