@@ -337,11 +337,8 @@ const refreshAccessToken = asyncHandler(async(req,res,next)=>{
         
     
         // 6.) at last return the response
-<<<<<<< HEAD
+
         const options = {
-=======
-        const opetions = {
->>>>>>> 4799f3f344ae1eb8a9f959ff3985ed7daa625b25
             httpOnly : true,
             secure : true
         }
@@ -364,8 +361,5 @@ const refreshAccessToken = asyncHandler(async(req,res,next)=>{
 
 });
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 4799f3f344ae1eb8a9f959ff3985ed7daa625b25
 export {registerUser,loginUser,logoutUser,refreshAccessToken};
